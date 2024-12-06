@@ -4,15 +4,19 @@
 
   defineProps<{ msg: string }>();
 
-  const count = ref(0);
-  const BINANCE_WS_URL = 'wss://stream.binance.com:9443/ws';
+  const btcPrice = ref('0');
+  const ethPrice = ref('0');
+  const adaPrice = ref('0');
+  const BINANCE_WS_URL = 'wss://stream.binance.com:9443/stream?streams=btcusdt@ticker/ethusdt@ticker/adausdt@ticker';
   const symbol = 'btcusdt';
   const stream = `${symbol}@ticker`;
 
-  const ws = new WebSocket(`${BINANCE_WS_URL}/${stream}`);
+  const ws = new WebSocket(`${BINANCE_WS_URL}`);
 
   const handleSpeak = () => {
-    const utterance = new SpeechSynthesisUtterance(count.value.toString());
+    const text = `比特幣${btcPrice.value}元, 以太幣${ethPrice.value}元, 艾達幣${adaPrice.value}`;
+
+    const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'zh-TW'; // 設定語言為繁體中文
     const voices = window.speechSynthesis.getVoices();
     const voice = voices.find((v) => v.lang === 'zh-TW'); // 選擇正確的語音
@@ -27,14 +31,30 @@
     console.log('?');
 
     handleSpeak();
-  }, 5000);
+  }, 1000 * 60 * 1);
 
   ws.onmessage = function (msg) {
-    const ticker = JSON.parse(msg.data);
-    const price = ticker.c; // 最新成交價 (current price)
-    console.log(`[${new Date().toLocaleTimeString()}] BTC/USDT Price: $${price}`);
+    const parsedData = JSON.parse(msg.data);
 
-    count.value = parseInt(price);
+    // 獲取 ticker 的數據
+    const stream = parsedData.stream; // e.g., "btcusdt@ticker" 或 "ethusdt@ticker"
+    const tickerData = parsedData.data;
+
+    if (stream === 'btcusdt@ticker') {
+      btcPrice.value = parseInt(tickerData.c).toString(); // 最新成交價 (current price)
+    }
+
+    if (stream === 'ethusdt@ticker') {
+      ethPrice.value = parseInt(tickerData.c).toString(); // 最新成交價 (current price)
+    }
+
+    if (stream === 'adausdt@ticker') {
+      adaPrice.value = parseFloat(tickerData.c).toString(); // 最新成交價 (current price)
+    }
+
+    console.log(
+      `[${new Date().toLocaleTimeString()}] Updated Prices: BTC = ${btcPrice.value}, ETH = ${ethPrice.value}`
+    );
   };
 </script>
 
@@ -47,7 +67,9 @@
     開始播放比特幣價格
   </button>
   <div class="card">
-    <div type="button">比特幣價格：{{ count }} USDT</div>
+    <div>比特幣價格：{{ btcPrice }} USDT</div>
+    <div>以太幣價格：{{ ethPrice }} USDT</div>
+    <div>艾達幣價格：{{ adaPrice }} USDT</div>
   </div>
 </template>
 
