@@ -8,13 +8,11 @@
   const ethPrice = ref('0');
   const adaPrice = ref('0');
   const BINANCE_WS_URL = 'wss://stream.binance.com:9443/stream?streams=btcusdt@ticker/ethusdt@ticker/adausdt@ticker';
-  const symbol = 'btcusdt';
-  const stream = `${symbol}@ticker`;
 
   const ws = new WebSocket(`${BINANCE_WS_URL}`);
 
   const handleSpeak = () => {
-    const text = `比特幣${btcPrice.value}元, 以太幣${ethPrice.value}元, 艾達幣${adaPrice.value}`;
+    const text = `比特幣${btcPrice.value}元, 以太幣${ethPrice.value}元, 艾達幣${adaPrice.value}元`;
 
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'zh-TW'; // 設定語言為繁體中文
