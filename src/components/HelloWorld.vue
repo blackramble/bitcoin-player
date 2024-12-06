@@ -29,7 +29,7 @@
     console.log('?');
 
     handleSpeak();
-  }, 1000 * 60 * 1);
+  }, 1000 * 60 * 5);
 
   ws.onmessage = function (msg) {
     const parsedData = JSON.parse(msg.data);
